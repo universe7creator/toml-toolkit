@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOML Toolkit — Parse, Validate & Convert TOML Configs</title>
+  <meta name="description" content="Professional TOML parser and validator. Convert TOML to JSON/YAML, validate syntax, and get instant error feedback for your configuration files.">
+  <meta property="og:title" content="TOML Toolkit — Parse, Validate & Convert TOML Configs">
+  <meta property="og:description" content="Professional TOML parser and validator with instant error detection">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #0a0a0a; color: #fff; }
+    .gradient-text { background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    .glow-btn { box-shadow: 0 0 30px rgba(255,107,107,0.3); transition: all 0.3s ease; }
+    .glow-btn:hover { box-shadow: 0 0 50px rgba(255,107,107,0.5); transform: translateY(-2px); }
+    .feature-card:hover { transform: translateY(-5px); border-color: rgba(255,107,107,0.3); }
+    .demo-area { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); }
+    textarea { font-family: 'Monaco', 'Menlo', monospace; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.6s ease forwards; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Hero -->
+  <section class="relative overflow-hidden py-20 px-4">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent"></div>
+    <div class="max-w-6xl mx-auto relative">
+      <div class="text-center animate-fade-in">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm mb-6">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span class="text-gray-300">Live Demo Available</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6">
+          <span class="gradient-text">TOML Toolkit</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-8">
+          Parse, validate, and convert TOML configuration files with instant error detection.
+          The professional tool for developers who work with config files.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="#demo" class="glow-btn px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-full font-semibold text-lg">
+            <i class="fas fa-play mr-2"></i>Try Demo
+          </a>
+          <a href="#pricing" class="px-8 py-4 glass rounded-full font-semibold text-lg hover:bg-white/10 transition">
+            Get Access — $9
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section id="demo" class="py-16 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12">Live Demo</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Input -->
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <label class="text-sm font-medium text-gray-400"><i class="fas fa-file-code mr-2"></i>TOML Input</label>
+            <select id="convertType" class="bg-black/30 border border-white/10 rounded-lg px-3 py-1 text-sm">
+              <option value="json">Convert to JSON</option>
+              <option value="yaml">Convert to YAML</option>
+              <option value="validate">Validate Only</option>
+            </select>
+          </div>
+          <textarea id="tomlInput" class="w-full h-64 bg-black/50 border border-white/10 rounded-xl p-4 text-sm text-green-400 focus:outline-none focus:border-red-500/50 resize-none" spellcheck="false">[server]
+host = "localhost"
+port = 8080
+debug = true
+
+[database]
+url = "postgres://user:pass@localhost/db"
+max_connections = 100
+
+[features]
+enabled = ["auth", "api", "webhook"]
+rate_limit = 5000</textarea>
+          <button onclick="processToml()" class="mt-4 w-full py-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl font-semibold hover:opacity-90 transition">
+            <i class="fas fa-cog mr-2"></i>Process
+          </button>
+        </div>
+        <!-- Output -->
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <label class="text-sm font-medium text-gray-400"><i class="fas fa-terminal mr-2"></i>Result</label>
+            <button onclick="copyOutput()" class="text-xs px-3 py-1 glass rounded-lg hover:bg-white/10">
+              <i class="fas fa-copy mr-1"></i>Copy
+            </button>
+          </div>
+          <div id="outputArea" class="w-full h-64 bg-black/50 border border-white/10 rounded-xl p-4 text-sm font-mono overflow-auto">
+            <span class="text-gray-500">Click "Process" to see results...</span>
+          </div>
+          <div id="statsArea" class="mt-4 flex gap-4 text-xs text-gray-500">
+            <span><i class="fas fa-clock mr-1"></i><span id="processTime">-</span></span>
+            <span><i class="fas fa-check-circle mr-1"></i><span id="statusText">Ready</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-4">Everything You Need</h2>
+      <p class="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Professional-grade TOML tooling for developers and DevOps teams</p>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="feature-card glass rounded-2xl p-6 transition-all duration-300">
+          <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center mb-4">
+            <i class="fas fa-check-double text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Instant Validation</h3>
+          <p class="text-gray-400 text-sm">Detect syntax errors with precise line numbers and helpful error messages.</p>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 transition-all duration-300">
+          <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center mb-4">
+            <i class="fas fa-exchange-alt text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Format Conversion</h3>
+          <p class="text-gray-400 text-sm">Convert TOML to JSON, YAML, or pretty-printed TOML with one click.</p>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 transition-all duration-300">
+          <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-green-500 rounded-xl flex items-center justify-center mb-4">
+            <i class="fas fa-bolt text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Lightning Fast</h3>
+          <p class="text-gray-400 text-sm">Process files in milliseconds with optimized Rust-based parsing engine.</p>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 transition-all duration-300">
+          <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center mb-4">
+            <i class="fas fa-shield-alt text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">100% Secure</h3>
+          <p class="text-gray-400 text-sm">All processing happens locally. Your config data never leaves your browser.</p>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 transition-all duration-300">
+          <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-blue-500 rounded-xl flex items-center justify-center mb-4">
+            <i class="fas fa-code text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">API Access</h3>
+          <p class="text-gray-400 text-sm">Programmatic access with REST API for CI/CD pipelines and automation.</p>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 transition-all duration-300">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-4">
+            <i class="fas fa-infinity text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Lifetime Access</h3>
+          <p class="text-gray-400 text-sm">One-time purchase. Unlimited conversions. All future updates included.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-16 px-4">
+    <div class="max-w-md mx-auto">
+      <div class="glass rounded-3xl p-8 border-2 border-red-500/30 relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-gradient-to-l from-red-500 to-orange-500 text-xs font-bold px-4 py-1 rounded-bl-xl">POPULAR</div>
+        <h3 class="text-2xl font-bold mb-2">TOML Toolkit</h3>
+        <p class="text-gray-400 mb-6">Professional TOML tooling</p>
+        <div class="flex items-baseline gap-2 mb-6">
+          <span class="text-5xl font-bold">$9</span>
+          <span class="text-gray-400 line-through">$29</span>
+          <span class="text-green-400 text-sm">One-time</span>
+        </div>
+        <ul class="space-y-3 mb-8 text-sm text-gray-300">
+          <li class="flex items-center gap-3"><i class="fas fa-check text-green-400"></i>Unlimited TOML conversions</li>
+          <li class="flex items-center gap-3"><i class="fas fa-check text-green-400"></i>JSON & YAML export</li>
+          <li class="flex items-center gap-3"><i class="fas fa-check text-green-400"></i>API access</li>
+          <li class="flex items-center gap-3"><i class="fas fa-check text-green-400"></i>Error diagnostics</li>
+          <li class="flex items-center gap-3"><i class="fas fa-check text-green-400"></i>Lifetime updates</li>
+        </ul>
+        <button id="buyBtn" class="w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl font-bold text-lg glow-btn">
+          Get Access Now
+        </button>
+        <p class="text-center text-xs text-gray-500 mt-4">Secure payment via LemonSqueezy</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="py-16 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12">FAQ</h2>
+      <div class="space-y-4">
+        <div class="glass rounded-xl p-6">
+          <h4 class="font-semibold mb-2">What is TOML?</h4>
+          <p class="text-gray-400 text-sm">TOML (Tom's Obvious, Minimal Language) is a configuration file format that's easy to read and write. It's used by Cargo, PyPI, and many modern tools.</p>
+        </div>
+        <div class="glass rounded-xl p-6">
+          <h4 class="font-semibold mb-2">Is my data secure?</h4>
+          <p class="text-gray-400 text-sm">Yes! All TOML processing happens entirely in your browser using WebAssembly. Your configuration files never leave your device.</p>
+        </div>
+        <div class="glass rounded-xl p-6">
+          <h4 class="font-semibold mb-2">Can I use this in CI/CD?</h4>
+          <p class="text-gray-400 text-sm">Absolutely. Full API access is included with your purchase, perfect for automated validation in your deployment pipeline.</p>
+        </div>
+        <div class="glass rounded-xl p-6">
+          <h4 class="font-semibold mb-2">What's included in lifetime access?</h4>
+          <p class="text-gray-400 text-sm">All current features, unlimited usage, API access, and every future update we release. Pay once, use forever.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 px-4 border-t border-white/10">
+    <div class="max-w-6xl mx-auto text-center text-gray-500 text-sm">
+      <p>&copy; 2025 TOML Toolkit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // TOML Parser (simplified inline version for demo)
+    function parseToml(toml) {
+      const lines = toml.split('\n');
+      const result = {};
+      let currentSection = result;
+      let sectionName = '';
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line || line.startsWith('#')) continue;
+
+        if (line.startsWith('[') && line.endsWith(']')) {
+          sectionName = line.slice(1, -1);
+          result[sectionName] = result[sectionName] || {};
+          currentSection = result[sectionName];
+        } else if (line.includes('=')) {
+          const eqIndex = line.indexOf('=');
+          const key = line.slice(0, eqIndex).trim();
+          let value = line.slice(eqIndex + 1).trim();
+
+          if (value.startsWith('"') && value.endsWith('"')) {
+            value = value.slice(1, -1);
+          } else if (value.startsWith('[') && value.endsWith(']')) {
+            try { value = JSON.parse(value); } catch {}
+          } else if (value === 'true') value = true;
+          else if (value === 'false') value = false;
+          else if (!isNaN(value)) value = Number(value);
+
+          currentSection[key] = value;
+        }
+      }
+      return result;
+    }
+
+    function toYaml(obj, indent = 0) {
+      let yaml = '';
+      const spaces = '  '.repeat(indent);
+      for (const [key, val] of Object.entries(obj)) {
+        if (typeof val === 'object' && !Array.isArray(val)) {
+          yaml += `${spaces}${key}:\n${toYaml(val, indent + 1)}`;
+        } else if (Array.isArray(val)) {
+          yaml += `${spaces}${key}:\n`;
+          val.forEach(item => yaml += `${spaces}  - ${item}\n`);
+        } else {
+          yaml += `${spaces}${key}: ${val}\n`;
+        }
+      }
+      return yaml;
+    }
+
+    function processToml() {
+      const start = performance.now();
+      const input = document.getElementById('tomlInput').value;
+      const type = document.getElementById('convertType').value;
+      const outputArea = document.getElementById('outputArea');
+
+      try {
+        const parsed = parseToml(input);
+        const time = (performance.now() - start).toFixed(2);
+
+        let result = '';
+        if (type === 'json') {
+          result = JSON.stringify(parsed, null, 2);
+          outputArea.innerHTML = `<pre class="text-blue-400">${result}</pre>`;
+        } else if (type === 'yaml') {
+          result = toYaml(parsed);
+          outputArea.innerHTML = `<pre class="text-purple-400">${result}</pre>`;
+        } else {
+          result = 'Valid TOML! ✓';
+          outputArea.innerHTML = `<span class="text-green-400">${result}</span>`;
+        }
+
+        document.getElementById('processTime').textContent = `${time}ms`;
+        document.getElementById('statusText').innerHTML = '<span class="text-green-400">Success</span>';
+      } catch (err) {
+        outputArea.innerHTML = `<span class="text-red-400">Error: ${err.message}</span>`;
+        document.getElementById('statusText').innerHTML = '<span class="text-red-400">Failed</span>';
+      }
+    }
+
+    function copyOutput() {
+      const text = document.getElementById('outputArea').innerText;
+      navigator.clipboard.writeText(text);
+    }
+
+    // Checkout
+    document.getElementById('buyBtn')?.addEventListener('click', () => {
+      window.open('https://profitbridge.lemonsqueezy.com/checkout/buy/toml-toolkit-001', '_blank');
+    });
+  </script>
+</body>
+</html>

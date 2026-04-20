@@ -1,0 +1,14 @@
+{
+  "name": "toml-toolkit",
+  "version": "1.0.0",
+  "description": "Parse, validate, and convert TOML config files with instant error detection",
+  "main": "api/process.js",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "vercel-build": "echo 'Build complete'"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
